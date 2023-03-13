@@ -1,5 +1,5 @@
 {
-  "name": "pure-admin-thin",
+  "name": "weather-admin",
   "version": "3.9.7",
   "private": true,
   "scripts": {
@@ -118,7 +118,7 @@
       ]
     }
   },
-  "repository": "git@github.com:pure-admin/pure-admin-thin.git",
-  "author": "xiaoxian521",
+  "repository": "git@github.com/adteven/weather-admin.git",
+  "author": "astevencui",
   "license": "MIT"
 }
