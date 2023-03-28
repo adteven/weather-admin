@@ -96,6 +96,9 @@ declare global {
     MenuArrowIconNoTransition?: boolean;
     CachingAsyncRoutes?: boolean;
     TooltipEffect?: Effect;
+
+
+    Api?: string;
   }
 
   /**

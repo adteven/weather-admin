@@ -161,6 +161,7 @@ function addPathMatch() {
 
 /** 处理动态路由（后端返回的路由） */
 function handleAsyncRoutes(routeList) {
+  console.log("handleAsyncRoutes", routeList);
   if (routeList.length === 0) {
     usePermissionStoreHook().handleWholeMenus(routeList);
   } else {
@@ -205,8 +206,8 @@ function initRouter() {
     } else {
       return new Promise(resolve => {
         getAsyncRoutes().then(({ data }) => {
-          handleAsyncRoutes(cloneDeep(data));
-          storageSession().setItem(key, data);
+          handleAsyncRoutes(cloneDeep(data.data));
+          storageSession().setItem(key, data.data);
           resolve(router);
         });
       });
@@ -214,7 +215,7 @@ function initRouter() {
   } else {
     return new Promise(resolve => {
       getAsyncRoutes().then(({ data }) => {
-        handleAsyncRoutes(cloneDeep(data));
+        handleAsyncRoutes(cloneDeep(data.data));
         resolve(router);
       });
     });

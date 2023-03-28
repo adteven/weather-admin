@@ -16,7 +16,9 @@ export const useUserStore = defineStore({
     username:
       storageSession().getItem<DataInfo<number>>(sessionKey)?.username ?? "",
     // 页面级别权限
-    roles: storageSession().getItem<DataInfo<number>>(sessionKey)?.roles ?? []
+    roles: storageSession().getItem<DataInfo<number>>(sessionKey)?.roles ?? [],
+    // 是否超级管理员，
+    superAdmin: 1
   }),
   actions: {
     /** 存储用户名 */
@@ -33,8 +35,8 @@ export const useUserStore = defineStore({
         getLogin(data)
           .then(data => {
             if (data) {
-              setToken(data.data);
-              resolve(data);
+              setToken(data.data.data);
+              resolve(data.data);
             }
           })
           .catch(error => {

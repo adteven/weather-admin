@@ -1,7 +1,9 @@
 import { App } from "vue";
 import axios from "axios";
 
-let config: object = {};
+let config: object = {
+  Api: "http://localhost:8089"
+};
 const { VITE_PUBLIC_PATH } = import.meta.env;
 
 const setConfig = (cfg?: unknown) => {

@@ -1,6 +1,6 @@
 {
   "Version": "3.9.7",
-  "Title": "PureAdmin",
+  "Title": "WeatherAdmin",
   "FixedHeader": true,
   "HiddenSideBar": false,
   "MultiTagsCache": false,
@@ -17,5 +17,6 @@
   "ShowModel": "smart",
   "MenuArrowIconNoTransition": true,
   "CachingAsyncRoutes": false,
-  "TooltipEffect": "light"
+  "TooltipEffect": "light",
+  "Api": "http://localhost:8089"
 }

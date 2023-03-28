@@ -13,12 +13,15 @@ import { stringify } from "qs";
 import NProgress from "../progress";
 import { getToken, formatToken } from "@/utils/auth";
 import { useUserStoreHook } from "@/store/modules/user";
+import { getConfig } from "@/config";
+import { IHttpResponse, IObject } from "@/../types/interface";
+const { Api } = getConfig();
 
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
 const defaultConfig: AxiosRequestConfig = {
   // 请求超时时间
   timeout: 10000,
-  baseURL: "http://localhost:8089",
+  baseURL: Api,
   headers: {
     Accept: "application/json, text/plain, */*",
     "Content-Type": "application/json",
@@ -46,7 +49,7 @@ class PureHttp {
   private static initConfig: PureHttpRequestConfig = {};
 
   /** 保存当前Axios实例对象 */
-  private static axiosInstance: AxiosInstance = Axios.create(defaultConfig);
+  public static axiosInstance: AxiosInstance = Axios.create(defaultConfig);
 
   /** 重连原始请求 */
   private static retryOriginalRequest(config: PureHttpRequestConfig) {
@@ -124,16 +127,20 @@ class PureHttp {
         const $config = response.config;
         // 关闭进度条动画
         NProgress.done();
+        // 判断未登录调到登录页面
+        if (response.data.code == 401) {
+          useUserStoreHook().logOut();
+        }
         // 优先判断post/get等方法是否传入回掉，否则执行初始化设置等回掉
         if (typeof $config.beforeResponseCallback === "function") {
           $config.beforeResponseCallback(response);
-          return response.data;
+          return response;
         }
         if (PureHttp.initConfig.beforeResponseCallback) {
           PureHttp.initConfig.beforeResponseCallback(response);
-          return response.data;
+          return response;
         }
-        return response.data;
+        return response;
       },
       (error: PureHttpError) => {
         const $error = error;
@@ -193,3 +200,13 @@ class PureHttp {
 }
 
 export const http = new PureHttp();
+
+export default (o: AxiosRequestConfig): Promise<IHttpResponse> => {
+  return new Promise((resolve, reject) => {
+    PureHttp.axiosInstance(o)
+      .then((res: any) => {
+        return resolve(res.data);
+      })
+      .catch(reject);
+  });
+};

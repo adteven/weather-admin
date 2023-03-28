@@ -15,7 +15,7 @@ const errorInfo = "当前路由配置不正确，请检查配置";
 export function useNav() {
   const route = useRoute();
   const pureApp = useAppStoreHook();
-  const routers = useRouter().options.routes;
+  const routers = useRouter()?.options.routes;
   const { wholeMenus } = storeToRefs(usePermissionStoreHook());
   /** 平台`layout`中所有`el-tooltip`的`effect`配置，默认`light` */
   const tooltipEffect = getConfig()?.TooltipEffect ?? "light";

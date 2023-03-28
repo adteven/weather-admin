@@ -12,11 +12,13 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { ref, reactive, toRaw, onMounted, onBeforeUnmount } from "vue";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { initRouter } from "@/router/utils";
-
+import { getUuid } from "@/utils/utils";
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
 import User from "@iconify-icons/ri/user-3-fill";
+import Line from "@iconify-icons/ri/shield-keyhole-line";
+import { getConfig } from "@/config";
 
 defineOptions({
   name: "Login"
@@ -24,6 +26,8 @@ defineOptions({
 const router = useRouter();
 const loading = ref(false);
 const ruleFormRef = ref<FormInstance>();
+const captchaUrl = ref("");
+const { Api } = getConfig();
 
 const { initStorage } = useLayout();
 initStorage();
@@ -34,7 +38,9 @@ const { title } = useNav();
 
 const ruleForm = reactive({
   username: "admin",
-  password: "admin123"
+  password: "admin123",
+  verifyCode: "",
+  uuid: ""
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
@@ -43,7 +49,12 @@ const onLogin = async (formEl: FormInstance | undefined) => {
   await formEl.validate((valid, fields) => {
     if (valid) {
       useUserStoreHook()
-        .loginByUsername({ username: ruleForm.username, password: "admin123" })
+        .loginByUsername({
+          username: ruleForm.username,
+          password: "admin",
+          uuid: ruleForm.uuid,
+          captcha: ruleForm.verifyCode
+        })
         .then(res => {
           if (res.code == 200) {
             // 获取后端路由
@@ -66,9 +77,17 @@ function onkeypress({ code }: KeyboardEvent) {
     onLogin(ruleFormRef.value);
   }
 }
+function getCaptchaUrl() {
+  ruleForm.uuid = getUuid();
+  captchaUrl.value = `${Api}/captcha?uuid=${ruleForm.uuid}`;
+}
+function onRefreshCode() {
+  getCaptchaUrl();
+}
 
 onMounted(() => {
   window.document.addEventListener("keypress", onkeypress);
+  getCaptchaUrl();
 });
 
 onBeforeUnmount(() => {
@@ -135,6 +154,31 @@ onBeforeUnmount(() => {
                   placeholder="密码"
                   :prefix-icon="useRenderIcon(Lock)"
                 />
+              </el-form-item>
+            </Motion>
+
+            <Motion :delay="200">
+              <el-form-item prop="verifyCode">
+                <el-input
+                  clearable
+                  v-model="ruleForm.verifyCode"
+                  placeholder="验证码"
+                  :prefix-icon="useRenderIcon(Line)"
+                >
+                  <template v-slot:append>
+                    <img
+                      style="
+                        vertical-align: middle;
+                        height: 40px;
+                        width: 100px;
+                        cursor: pointer;
+                      "
+                      :src="captchaUrl"
+                      @click="onRefreshCode"
+                      alt=""
+                    />
+                  </template>
+                </el-input>
               </el-form-item>
             </Motion>
 

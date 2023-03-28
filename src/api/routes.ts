@@ -5,6 +5,10 @@ type Result = {
   data: Array<any>;
 };
 
+// export const getAsyncRoutes = () => {
+//   return http.request<Result>("get", "/getAsyncRoutes");
+// };
+
 export const getAsyncRoutes = () => {
-  return http.request<Result>("get", "/getAsyncRoutes");
+  return http.get("/getAsyncRoutes");
 };
