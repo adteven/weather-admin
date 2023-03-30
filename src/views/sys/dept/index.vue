@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import { reactive, toRefs, ref } from "vue";
 import useView from "@/hooks/useView";
-import AddOrUpdate from "@/views/sys/menu/addOrUpdate.vue";
+import AddOrUpdate from "./addOrUpdate.vue";
 
 defineOptions({
   name: "Dept"

@@ -5,7 +5,7 @@ import { constantMenus } from "@/router";
 import { ascending, filterTree, filterNoPermissionTree } from "@/router/utils";
 
 export const usePermissionStore = defineStore({
-  id: "pure-permission",
+  id: "permission",
   state: () => ({
     // 静态路由生成的菜单
     constantMenus,

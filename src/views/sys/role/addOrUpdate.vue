@@ -12,21 +12,26 @@
       @keyup.enter="dataFormSubmitHandle()"
       label-width="120px"
     >
-      <el-form-item label="岗位编码" prop="postCode">
-        <el-input v-model="dataForm.postCode" />
+      <el-form-item prop="name" label="角色名称">
+        <el-input v-model="dataForm.name" placeholder="角色名称" />
       </el-form-item>
-      <el-form-item label="岗位名称" prop="postName">
-        <el-input v-model="dataForm.postName" />
+      <el-form-item prop="remark" label="备注">
+        <el-input v-model="dataForm.remark" placeholder="备注" />
       </el-form-item>
-      <el-form-item label="排序" prop="sort">
-        <el-input-number v-model="dataForm.sort" :min="0" />
-      </el-form-item>
-      <el-form-item :label="状态" prop="status">
-        <el-radio-group v-model="dataForm.status" :disabled="!!dataForm.id">
-          <el-radio :label="0">正常</el-radio>
-          <el-radio :label="1">停用</el-radio>
-        </el-radio-group>
-      </el-form-item>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item size="small" label="菜单授权">
+            <el-tree
+              :data="menuList"
+              :props="{ label: 'name', children: 'children' }"
+              node-key="id"
+              ref="menuListTree"
+              accordion
+              show-checkbox
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <template v-slot:footer>
       <el-button @click="visible = false">取消</el-button>
@@ -36,9 +41,8 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, nextTick } from "vue";
 import baseService from "@/service";
-import { getIconList } from "@/utils/utils";
 import { IObject } from "@/../types/interface";
 import { ElMessage } from "element-plus";
 
@@ -46,23 +50,22 @@ const emit = defineEmits(["refreshDataList"]);
 
 const visible = ref(false);
 const dataFormRef = ref();
+const menuList = ref([]);
+const deptList = ref([]);
+const menuListTree = ref();
 
 const dataForm = reactive({
   id: "",
-  postCode: "",
-  postName: "",
-  sort: 0,
-  status: 1
+  name: "",
+  menuIdList: [] as IObject[],
+  remark: ""
 });
 
 const rules = ref({
-  postCode: [{ required: true, message: "必填项不能为空", trigger: "blur" }],
-  postName: [{ required: true, message: "必填项不能为空", trigger: "blur" }],
-  sort: [{ required: true, message: "必填项不能为空", trigger: "blur" }],
-  status: [{ required: true, message: "必填项不能为空", trigger: "blur" }]
+  name: [{ required: true, message: "必填项不能为空", trigger: "blur" }]
 });
 
-const init = (id: number) => {
+const init = (id?: number) => {
   visible.value = true;
   dataForm.id = "";
 
@@ -71,15 +74,41 @@ const init = (id: number) => {
     dataFormRef.value.resetFields();
   }
 
-  if (id) {
-    getInfo(id);
-  }
+  nextTick(() => {
+    if (menuListTree.value) {
+      menuListTree.value.setCheckedKeys([]);
+    }
+
+    Promise.all([getMenuList(), getDeptList()]).then(() => {
+      if (id) {
+        getInfo(id);
+      }
+    });
+  });
+};
+
+// 获取菜单列表
+const getMenuList = () => {
+  return baseService.get("/sys/menu/select").then(res => {
+    menuList.value = res.data;
+  });
+};
+
+// 获取部门列表
+const getDeptList = () => {
+  return baseService.get("/sys/dept/list").then(res => {
+    deptList.value = res.data;
+  });
 };
 
 // 获取信息
 const getInfo = (id: number) => {
-  baseService.get("/sys/post/" + id).then(res => {
+  baseService.get(`/sys/role/${id}`).then(res => {
     Object.assign(dataForm, res.data);
+
+    dataForm.menuIdList.forEach((item: IObject) =>
+      menuListTree.value.setChecked(item, true)
+    );
   });
 };
 
@@ -89,12 +118,16 @@ const dataFormSubmitHandle = () => {
     if (!valid) {
       return false;
     }
+    dataForm.menuIdList = [
+      ...menuListTree.value.getHalfCheckedKeys(),
+      ...menuListTree.value.getCheckedKeys()
+    ];
     (!dataForm.id ? baseService.post : baseService.put)(
-      "/sys/post/",
+      "/sys/role",
       dataForm
     ).then(res => {
       ElMessage.success({
-        message: t("prompt.success"),
+        message: "提交成功",
         duration: 500,
         onClose: () => {
           visible.value = false;

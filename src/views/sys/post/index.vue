@@ -6,57 +6,54 @@
       @keyup.enter="state.getDataList()"
     >
       <el-form-item>
-        <el-button type="primary" @click="addOrUpdateHandle()">添加</el-button>
+        <el-input
+          v-model="state.dataForm.postCode"
+          placeholder="岗位编码"
+          clearable
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-input
+          v-model="state.dataForm.postName"
+          placeholder="岗位名称"
+          clearable
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="state.getDataList()">查询</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="addOrUpdateHandle()">增加</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="danger" @click="state.deleteHandle()">删除</el-button>
       </el-form-item>
     </el-form>
     <el-table
-      class="tableBox"
       v-loading="state.dataListLoading"
       :data="state.dataList"
-      row-key="id"
       border
+      @selection-change="state.dataListSelectionChangeHandle"
+      style="width: 100%"
     >
       <el-table-column
-        prop="name"
-        label="名称"
+        type="selection"
         header-align="center"
-        min-width="150"
+        align="center"
+        width="50"
       />
       <el-table-column
-        prop="icon"
-        label="图标"
+        prop="postCode"
+        label="岗位编码"
         header-align="center"
         align="center"
-      >
-        <template v-slot="scope">
-          <svg class="iconfont" aria-hidden="true">
-            <use :xlink:href="`#${scope.row.icon}`" />
-          </svg>
-        </template>
-      </el-table-column>
+      />
       <el-table-column
-        prop="menuType"
-        label="类型"
+        prop="postName"
+        label="岗位名称"
         header-align="center"
         align="center"
-      >
-        <template v-slot="scope">
-          <el-tag v-if="scope.row.type === 0">菜单</el-tag>
-          <el-tag v-else type="info">按钮</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="openStyle"
-        label="打开方式"
-        header-align="center"
-        align="center"
-      >
-        <template v-slot="scope">
-          <span v-if="scope.row.type !== 0" />
-          <el-tag v-else-if="scope.row.openStyle === 1">外部打开</el-tag>
-          <el-tag v-else type="info">内部打开</el-tag>
-        </template>
-      </el-table-column>
+      />
       <el-table-column
         prop="sort"
         label="排序"
@@ -64,36 +61,19 @@
         align="center"
       />
       <el-table-column
-        prop="url"
-        label="路由"
+        prop="status"
+        label="状态"
         header-align="center"
         align="center"
-        width="150"
-        :show-overflow-tooltip="true"
-      />
-      <el-table-column
-        prop="permissions"
-        label="权限标识"
-        header-align="center"
-        align="center"
-        width="150"
-        :show-overflow-tooltip="true"
       />
       <el-table-column
         label="操作"
         fixed="right"
         header-align="center"
         align="center"
-        width="170"
+        width="150"
       >
         <template v-slot="scope">
-          <el-button
-            v-if="scope.row.menuType === 0"
-            type="primary"
-            link
-            @click="addHandle(scope.row)"
-            >添加</el-button
-          >
           <el-button
             type="primary"
             link
@@ -109,23 +89,39 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      :current-page="state.page"
+      :page-sizes="[10, 20, 50, 100]"
+      :page-size="state.limit"
+      :total="state.total"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="state.pageSizeChangeHandle"
+      @current-change="state.pageCurrentChangeHandle"
+    />
     <!-- 弹窗, 新增 / 修改 -->
-    <addOrUpdate ref="addOrUpdateRef" @refreshDataList="state.getDataList" />
+    <add-or-update ref="addOrUpdateRef" @refreshDataList="state.getDataList" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { reactive, toRefs, ref } from "vue";
 import useView from "@/hooks/useView";
-import AddOrUpdate from "@/views/sys/menu/addOrUpdate.vue";
+import AddOrUpdate from "./addOrUpdate.vue";
 
 defineOptions({
-  name: "Menu"
+  name: "Post"
 });
 
 const view = reactive({
-  getDataListURL: "/sys/menu/list",
-  deleteURL: "/sys/menu"
+  getDataListURL: "/sys/post/page",
+  getDataListIsPage: true,
+  deleteURL: "/sys/post",
+  deleteIsBatch: true,
+  dataForm: {
+    postCode: "",
+    postName: "",
+    status: ""
+  }
 });
 
 const state = reactive({ ...useView(view), ...toRefs(view) });
@@ -135,9 +131,6 @@ const addOrUpdateHandle = (id?: number) => {
   addOrUpdateRef.value.init(id);
 };
 
-const addHandle = (row: any) => {
-  addOrUpdateRef.value.init2(row);
-};
 </script>
 
 <style lang="scss" scoped>

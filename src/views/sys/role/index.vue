@@ -15,6 +15,12 @@
       <el-form-item>
         <el-button @click="state.getDataList()">查询</el-button>
       </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="addOrUpdateHandle()">增加</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="danger" @click="state.deleteHandle()">删除</el-button>
+      </el-form-item>
     </el-form>
     <el-table
       v-loading="state.dataListLoading"
@@ -38,7 +44,7 @@
       />
       <el-table-column
         prop="remark"
-        label="名称"
+        label="备注"
         header-align="center"
         align="center"
       />
@@ -50,6 +56,28 @@
         align="center"
         width="180"
       />
+      <el-table-column
+        label="操作"
+        fixed="right"
+        header-align="center"
+        align="center"
+        width="150"
+      >
+        <template v-slot="scope">
+          <el-button
+            type="primary"
+            link
+            @click="addOrUpdateHandle(scope.row.id)"
+          >编辑</el-button
+          >
+          <el-button
+            type="primary"
+            link
+            @click="state.deleteHandle(scope.row.id)"
+          >删除</el-button
+          >
+        </template>
+      </el-table-column>
     </el-table>
     <el-pagination
       :current-page="state.page"
@@ -60,12 +88,15 @@
       @size-change="state.pageSizeChangeHandle"
       @current-change="state.pageCurrentChangeHandle"
     />
+    <!-- 弹窗, 新增 / 修改 -->
+    <add-or-update ref="addOrUpdateRef" @refreshDataList="state.getDataList" />
   </div>
 </template>
 
 <script setup lang="ts">
 import useView from "@/hooks/useView";
-import { reactive, toRefs } from "vue";
+import { reactive, ref, toRefs } from "vue";
+import AddOrUpdate from "./addOrUpdate.vue";
 
 defineOptions({
   name: "Role"
@@ -76,16 +107,18 @@ const view = reactive({
   getDataListIsPage: true,
   deleteURL: "/sys/role",
   deleteIsBatch: true,
-  exportURL: "/sys/role/export",
   dataForm: {
-    username: "",
-    deptId: "",
-    postId: "",
-    gender: ""
+    name: ""
   }
 });
 
 const state = reactive({ ...useView(view), ...toRefs(view) });
+
+const addOrUpdateRef = ref();
+const addOrUpdateHandle = (id?: number) => {
+  addOrUpdateRef.value.init(id);
+};
+
 </script>
 
 <style lang="scss" scoped>

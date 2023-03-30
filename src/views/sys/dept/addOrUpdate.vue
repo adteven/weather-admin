@@ -56,7 +56,7 @@
           </div>
         </el-popover>
       </el-form-item>
-      <el-form-item prop="sort" :label="$t('dept.sort')">
+      <el-form-item prop="sort" label="排序">
         <el-input-number
           v-model="dataForm.sort"
           controls-position="right"
@@ -122,7 +122,7 @@ const init = (id?: number) => {
 // 获取部门列表
 const getDeptList = () => {
   return service.get("/sys/dept/list").then(res => {
-    if (res.code !== 0) {
+    if (res.code !== 200) {
       return ElMessage.error(res.msg);
     }
     deptList.value = res.data;

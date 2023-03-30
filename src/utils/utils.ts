@@ -39,3 +39,19 @@ export const getUuid = (): string => {
     return v.toString(16);
   });
 };
+
+/**
+ * 邮箱
+ * @param {*} s
+ */
+export const isEmail = (s: string): boolean => {
+  return /^([a-zA-Z0-9._-])+@([a-zA-Z0-9_-])+((.[a-zA-Z0-9_-]{2,3}){1,2})$/.test(s);
+};
+
+/**
+ * 手机号码
+ * @param {*} s
+ */
+export const isMobile = (s: string): boolean => {
+  return /^1[0-9]{10}$/.test(s);
+};

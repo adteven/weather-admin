@@ -10,7 +10,7 @@ import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { type DataInfo, setToken, removeToken, sessionKey } from "@/utils/auth";
 
 export const useUserStore = defineStore({
-  id: "pure-user",
+  id: "user",
   state: (): userType => ({
     // 用户名
     username:
